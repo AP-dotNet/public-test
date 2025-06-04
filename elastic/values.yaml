@@ -1,85 +1,18 @@
-
-esConfig:
-  elasticsearch.yml: |
-    xpack.security.enabled: true
-    xpack.security.http.ssl.enabled: false
-
-nodeSets:
-  - name: master
-    count: 1
-    config:
-      node.roles: [ "master" ]
-      node.name: "master-node"
-    volumeClaimTemplates:
-      - metadata:
-          name: elasticsearch-data
-        spec:
-          accessModes: ["ReadWriteOnce"]
-          storageClassName: azurefile-retain
-          resources:
-            requests:
-              storage: 5Gi
-    podTemplate:
-      spec:
-        containers:
-          - name: elasticsearch
-            resources:
-              requests:
-                cpu: "100m"
-                memory: 500Mi
-              limits:
-                cpu: "500m"
-                memory: 2Gi
-    esJavaOpts: "-Xmx1g -Xms1g"
-
-  - name: data
-    count: 1
-    config:
-      node.roles: [ "data" ]
-      node.name: "data-node"
-    volumeClaimTemplates:
-      - metadata:
-          name: elasticsearch-data
-        spec:
-          accessModes: ["ReadWriteOnce"]
-          storageClassName: azurefile-retain
-          resources:
-            requests:
-              storage: 5Gi
-    podTemplate:
-      spec:
-        containers:
-          - name: elasticsearch
-            resources:
-              requests:
-                cpu: "100m"
-                memory: 500Mi
-              limits:
-                cpu: "500m"
-                memory: 2Gi
-    esJavaOpts: "-Xmx1g -Xms1g"
-
-  - name: ingest
-    count: 1
-    config:
-      node.roles: [ "ingest" ]
-      node.name: "ingest-node"
-    podTemplate:
-      spec:
-        containers:
-          - name: elasticsearch
-            resources:
-              requests:
-                cpu: "100m"
-                memory: 500Mi
-              limits:
-                cpu: "500m"
-                memory: 2Gi
-    esJavaOpts: "-Xmx1g -Xms1g"
-
-readinessProbe:
-  failureThreshold: 3
-  initialDelaySeconds: 300
-  periodSeconds: 20
-  successThreshold: 5
-  timeoutSeconds: 10
+replicas: 1
+ 
+esJavaOpts: "-Xmx512m -Xms512m"
+ 
+resources:
+  requests:
+    cpu: 100m
+    memory: 512Mi
+  limits:
+    cpu: 500m
+    memory: 1Gi
+ 
+volumeClaimTemplate:
+  accessModes: ["ReadWriteOnce"]
+  storageClassName: azurefile
+  resources:
+    requests:
+      storage: 10Gi
