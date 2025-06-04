@@ -22,9 +22,9 @@ volumeClaimTemplate:
 nodeGroup: "default"
  
 roles:
-  master: "true"
-  data: "true"
-  ingest: "true"
+  - master
+  - data
+  - ingest
  
 persistence:
   enabled: true
