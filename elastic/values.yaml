@@ -1,18 +1,97 @@
-replicas: 1
+clusterName: elastic-prod
+nodeSets:
+  - name: master
+    count: 1
+    config:
+      node.roles: ["master"]
+      node.name: "master-${HOSTNAME}"
+    volumeClaimTemplates:
+      - metadata:
+          name: elasticsearch-data
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          storageClassName: managed-standard
+          resources:
+            requests:
+              storage: 20Gi
+    podResources:
+      requests:
+        memory: "1Gi"
+        cpu: "1"
+      limits:
+        memory: "2Gi"
+        cpu: "1"
  
-esJavaOpts: "-Xmx512m -Xms512m"
+  - name: data
+    count: 1
+    config:
+      node.roles: ["data"]
+      node.name: "data-${HOSTNAME}"
+    volumeClaimTemplates:
+      - metadata:
+          name: elasticsearch-data
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          storageClassName: managed-standard
+          resources:
+            requests:
+              storage: 10Gi
+    podResources:
+      requests:
+        memory: "1Gi"
+        cpu: "1"
+      limits:
+        memory: "2Gi"
+        cpu: "2"
  
+  - name: client
+    count: 1
+    config:
+      node.roles: ["ingest", "remote_cluster_client", "transform"]
+      node.name: "client-${HOSTNAME}"
+    volumeClaimTemplates:
+      - metadata:
+          name: elasticsearch-data
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          storageClassName: managed-standard
+          resources:
+            requests:
+              storage: 2Gi
+    podResources:
+      requests:
+        memory: "1Gi"
+        cpu: "500m"
+      limits:
+        memory: "1Gi"
+        cpu: "1"
+ 
+esJavaOpts: "-Xmx2g -Xms4g"
+ 
+# Seguridad habilitada
+security:
+  enabled: true
+ 
+# Ajustes de recursos generales
 resources:
   requests:
-    cpu: 100m
-    memory: 512Mi
+    cpu: "1"
+    memory: "2Gi"
   limits:
-    cpu: 500m
-    memory: 1Gi
+    cpu: "2"
+    memory: "4Gi"
  
-volumeClaimTemplate:
-  accessModes: ["ReadWriteOnce"]
-  storageClassName: azurefile
-  resources:
-    requests:
-      storage: 10Gi
+# Service
+service:
+  type: ClusterIP
+ 
+# PodAntiAffinity para alta disponibilidad
+antiAffinity: "soft"
+
+
+readinessProbe:
+  failureThreshold: 3
+  initialDelaySeconds: 300
+  periodSeconds: 20
+  successThreshold: 5
+  timeoutSeconds: 10
