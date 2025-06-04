@@ -14,7 +14,7 @@ resources:
  
 volumeClaimTemplate:
   accessModes: ["ReadWriteOnce"]
-  storageClassName: managed-standard
+  storageClassName: managed-csi
   resources:
     requests:
       storage: 10Gi
