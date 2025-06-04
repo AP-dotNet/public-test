@@ -1,63 +1,40 @@
-nodeSets:
-  - name: hot-nodes
-    count: 3
-    config:
-      node.roles: ["master", "data_hot", "ingest"]
-    volumeClaimTemplates:
-      - metadata:
-          name: elasticsearch-data
-        spec:
-          accessModes: ["ReadWriteOnce"]
-          storageClassName: managed-premium
-          resources:
-            requests:
-              storage: 50Gi
-    podResources:
-      requests:
-        cpu: "2"
-        memory: "4Gi"
-      limits:
-        cpu: "4"
-        memory: "8Gi"
+clusterName: elastic-dev
  
-  - name: warm-nodes
-    count: 2
-    config:
-      node.roles: ["data_warm"]
-    volumeClaimTemplates:
-      - metadata:
-          name: elasticsearch-data
-        spec:
-          accessModes: ["ReadWriteOnce"]
-          storageClassName: managed-standard
-          resources:
-            requests:
-              storage: 100Gi
-    podResources:
-      requests:
-        cpu: "1"
-        memory: "2Gi"
-      limits:
-        cpu: "2"
-        memory: "4Gi"
+replicas: 1
  
-  - name: cold-nodes
-    count: 1
-    config:
-      node.roles: ["data_cold"]
-    volumeClaimTemplates:
-      - metadata:
-          name: elasticsearch-data
-        spec:
-          accessModes: ["ReadWriteOnce"]
-          storageClassName: managed-standard
-          resources:
-            requests:
-              storage: 200Gi
-    podResources:
-      requests:
-        cpu: "500m"
-        memory: "1Gi"
-      limits:
-        cpu: "1"
-        memory: "2Gi"
+esJavaOpts: "-Xmx1g -Xms1g"
+ 
+resources:
+  requests:
+    cpu: "500m"
+    memory: "1Gi"
+  limits:
+    cpu: "1"
+    memory: "2Gi"
+ 
+volumeClaimTemplate:
+  accessModes: ["ReadWriteOnce"]
+  storageClassName: managed-standard
+  resources:
+    requests:
+      storage: 10Gi
+ 
+nodeGroup: "default"
+ 
+roles:
+  master: "true"
+  data: "true"
+  ingest: "true"
+ 
+persistence:
+  enabled: true
+ 
+security:
+  enabled: false
+ 
+service:
+  type: ClusterIP
+ 
+antiAffinity: "soft"
+
+
