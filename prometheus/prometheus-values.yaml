@@ -1,0 +1,184 @@
+# values.yaml
+
+# Configuración global
+global:
+  # Namespace donde se instalarán los recursos
+  namespaceOverride: "observability"
+
+# Configuración de Prometheus
+prometheus:
+  enabled: true
+  prometheusSpec:
+    # Número de réplicas de Prometheus
+    replicas: 1
+    # Límites de recursos para los pods de Prometheus
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "500m"
+      limits:
+        memory: "1Gi"
+        cpu: "1"
+    # Configuración de almacenamiento
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          storageClassName: managed-csi
+          resources:
+            requests:
+              storage: "5Gi"
+    # Configuración de reglas de alerta
+    ruleSelector:
+      matchLabels:
+        role: prometheus-rulefiles
+    # Configuración de scrape (recolección de métricas)
+    serviceMonitorSelector: {}
+    podMonitorSelector: {}
+
+# Configuración adicional de Prometheus
+    additionalScrapeConfigs:
+      - job_name: ingress
+        scrape_interval: 1m
+        scrape_timeout: 60s
+        metrics_path: /metrics
+        tls_config:
+          insecure_skip_verify: true
+        scheme: http
+        dns_sd_configs:
+        - names:
+          - ingress-nginx-controller.ingress
+          port: 10254
+
+      - job_name: argocd
+        scrape_interval: 1m
+        scrape_timeout: 60s
+        metrics_path: /metrics
+        scheme: http
+        dns_sd_configs:
+        - names:
+          - argocd-metrics.management
+          type: 'A'
+          port: 8082
+
+
+          
+    # Configuración de alertas
+    alerting:
+      alertmanagers:
+      - namespace: "observability"
+        name: "alertmanager-operated"
+        port: "web"
+
+# Configuración de Alertmanager
+alertmanager:
+  enabled: true
+  alertmanagerSpec:
+    # Número de réplicas de Alertmanager
+    replicas: 1
+    # Límites de recursos para los pods de Alertmanager
+    resources:
+      requests:
+        memory: "256Mi"
+        cpu: "250m"
+      limits:
+        memory: "512Mi"
+        cpu: "500m"
+    # Configuración de almacenamiento
+    storage:
+      volumeClaimTemplate:
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          storageClassName: managed-csi
+          resources:
+            requests:
+              storage: "2Gi"
+
+# Configuración de Grafana (opcional)
+grafana:
+  enabled: false
+  # admin:
+  #   existingSecret: grafana-admin-secret
+  # Configuración de recursos para Grafana
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "250m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+  # Configuración de persistencia para Grafana
+  persistence:
+    enabled: true
+    size: "2Gi"
+    storageClassName: managed-csi
+  # Configuración del panel de Grafana
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+      - name: 'default'
+        orgId: 1
+        folder: ''
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /var/lib/grafana/dashboards/default
+  dashboards:
+    default:
+      prometheus-stats:
+        gnetId: 2
+        revision: 2
+        datasource: Prometheus
+
+# Configuración de Node Exporter (opcional)
+nodeExporter:
+  enabled: true
+  extraArgs: {}
+  # Configuración de recursos para Node Exporter
+  resources:
+    requests:
+      memory: "228Mi"
+      cpu: "200m"
+    limits:
+      memory: "456Mi"
+      cpu: "400m"
+
+
+# Configuración de kubelet
+kubelet:
+  enabled: true
+  serviceMonitor:
+    interval: 30s
+
+# Configuración de kube-controller-manager
+kubeControllerManager:
+  enabled: true
+  serviceMonitor:
+    interval: 30s
+
+# Configuración de kube-scheduler
+kubeScheduler:
+  enabled: true
+  serviceMonitor:
+    interval: 30s
+
+# Configuración de kube-api-server
+kubeApiServer:
+  enabled: true
+  serviceMonitor:
+    interval: 30s
+
+# Configuración de Kube State Metrics (opcional)
+kubeStateMetrics:
+  enabled: true
+  # Configuración de recursos para Kube State Metrics
+  resources:
+    requests:
+      memory: "228Mi"
+      cpu: "200m"
+    limits:
+      memory: "456Mi"
+      cpu: "400m"
+
