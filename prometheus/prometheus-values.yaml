@@ -139,11 +139,11 @@ nodeExporter:
   # Configuración de recursos para Node Exporter
   resources:
     requests:
-      memory: "228Mi"
-      cpu: "200m"
+      memory: "128Mi"
+      cpu: "100m"
     limits:
-      memory: "456Mi"
-      cpu: "400m"
+      memory: "256Mi"
+      cpu: "200m"
 
 
 # Configuración de kubelet
@@ -176,9 +176,9 @@ kubeStateMetrics:
   # Configuración de recursos para Kube State Metrics
   resources:
     requests:
-      memory: "128Mi"
-      cpu: "100m"
-    limits:
-      memory: "256Mi"
+      memory: "228Mi"
       cpu: "200m"
+    limits:
+      memory: "456Mi"
+      cpu: "400m"
 
